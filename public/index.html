@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sangeet Pathshala — Attendance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">स</div>
+      <div class="brand-text">
+        <div class="brand-name">Sangeet<br />Pathshala</div>
+        <div class="brand-tag">Attendance</div>
+      </div>
+    </div>
+
+    <nav class="side-nav" id="tabs">
+      <button class="nav-btn active" data-tab="rollcall">
+        <svg viewBox="0 0 24 24" class="nav-icon"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"/></svg>
+        <span>Roll Call</span>
+      </button>
+      <button class="nav-btn" data-tab="students">
+        <svg viewBox="0 0 24 24" class="nav-icon"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3Zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5Zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z"/></svg>
+        <span>Students</span>
+      </button>
+      <button class="nav-btn" data-tab="teachers">
+        <svg viewBox="0 0 24 24" class="nav-icon"><path d="M12 3 1 9l11 6 9-4.91V17h2V9L12 3Zm0 8.5L4.5 8 12 4.5 19.5 8 12 11.5ZM5 13.18v4.34c0 1.24 3.13 2.98 7 2.98s7-1.74 7-2.98v-4.34l-7 3.82-7-3.82Z"/></svg>
+        <span>Teachers</span>
+      </button>
+      <button class="nav-btn" data-tab="dashboard">
+        <svg viewBox="0 0 24 24" class="nav-icon"><path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"/></svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-btn" data-tab="sync">
+        <svg viewBox="0 0 24 24" class="nav-icon"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8Zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3Z"/></svg>
+        <span>Sync</span>
+      </button>
+      <button class="nav-btn" data-tab="alerts">
+        <svg viewBox="0 0 24 24" class="nav-icon"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2Zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2Z"/></svg>
+        <span>Alerts</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-wave" aria-hidden="true">
+      <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+        <path id="wavePath" d="M0,20 Q25,5 50,20 T100,20 T150,20 T200,20" />
+      </svg>
+    </div>
+  </aside>
+
+  <div class="main-col">
+
+    <header class="topbar">
+      <div class="topbar-title">
+        <p class="eyebrow" id="page-eyebrow">Today</p>
+        <h1 id="page-title">Roll Call</h1>
+      </div>
+      <div class="topbar-controls" id="rollcall-controls">
+        <select id="rollcall-teacher-filter">
+          <option value="">All teachers</option>
+        </select>
+        <div class="date-control">
+          <input type="text" id="rollcall-date" class="bs-date-input" placeholder="YYYY-MM-DD (BS)" />
+        </div>
+        <div class="live-chip" id="live-chip">0 / 0 marked</div>
+        <button class="btn-primary" id="save-attendance">Save attendance</button>
+      </div>
+      <div class="topbar-controls" id="students-controls" hidden>
+        <input type="text" id="students-search" placeholder="Search students…" />
+        <input type="file" id="excel-file" accept=".xlsx,.xls" hidden />
+        <button class="btn-secondary" id="import-excel-btn">Import from Excel</button>
+      </div>
+      <div class="topbar-controls" id="dashboard-controls" hidden>
+        <input type="text" id="dashboard-search" placeholder="Search students…" />
+      </div>
+      <div class="topbar-controls" id="teachers-controls" hidden></div>
+      <div class="topbar-controls" id="sync-controls" hidden>
+        <button class="btn-primary" id="sync-now-btn">Sync now</button>
+      </div>
+      <div class="topbar-controls" id="alerts-controls" hidden>
+        <button class="btn-primary" id="alerts-check-now-btn">Check &amp; send now</button>
+      </div>
+    </header>
+
+    <main>
+
+      <!-- ROLL CALL -->
+      <section id="tab-rollcall" class="tab-panel active">
+        <div class="status-line" id="rollcall-status"></div>
+        <div id="rollcall-groups" class="groups"></div>
+        <div id="rollcall-empty" class="empty-state" hidden>
+          <p>No students on the register yet.</p>
+          <p class="empty-sub">Add them in the Students tab, or import your existing list from Excel.</p>
+        </div>
+      </section>
+
+      <!-- STUDENTS -->
+      <section id="tab-students" class="tab-panel">
+        <div class="status-line" id="import-status"></div>
+
+        <form id="add-student-form" class="add-form">
+          <div class="add-course-banner" id="add-course-banner" hidden>
+            <span id="add-course-banner-text"></span>
+            <button type="button" class="link-btn" id="add-course-cancel">Cancel — add a new student instead</button>
+          </div>
+          <div class="add-form-group">
+            <span class="add-form-group-label">Student</span>
+            <div class="add-form-row">
+              <div class="field">
+                <label for="new-student-id">Student ID</label>
+                <input type="text" id="new-student-id" placeholder="Auto (e.g. SP0001)" />
+              </div>
+              <div class="field">
+                <label for="new-name">Name</label>
+                <input type="text" id="new-name" list="existing-student-names" required />
+                <datalist id="existing-student-names"></datalist>
+                <div class="existing-student-hint" id="existing-student-hint" hidden></div>
+              </div>
+              <div class="field">
+                <label for="new-contact">Contact</label>
+                <input type="text" id="new-contact" placeholder="Phone or email" />
+              </div>
+              <div class="field">
+                <label for="new-admission">Admission date</label>
+                <input type="text" id="new-admission" class="bs-date-input" placeholder="YYYY-MM-DD (BS)" />
+              </div>
+            </div>
+          </div>
+
+          <div class="add-form-group">
+            <span class="add-form-group-label">Class</span>
+            <div class="add-form-row">
+              <div class="field">
+                <label for="new-teacher">Teacher</label>
+                <select id="new-teacher" required></select>
+              </div>
+              <div class="field">
+                <label for="new-class-time">Class time</label>
+                <select id="new-class-time" disabled>
+                  <option value="" disabled selected>Select teacher first</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="new-course">Course</label>
+                <select id="new-course" required>
+                  <option value="" disabled selected>Select course</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="new-duration">Duration</label>
+                <select id="new-duration">
+                  <option value="" selected>Optional</option>
+                  <option value="1 month">1 month — 12 classes</option>
+                  <option value="3 month">3 month — 36 classes</option>
+                  <option value="6 month">6 month — 72 classes</option>
+                  <option value="1 year">1 year — 144 classes</option>
+                </select>
+              </div>
+            </div>
+            <div class="session-info" id="teacher-session-info"></div>
+          </div>
+
+          <div class="add-form-group">
+            <span class="add-form-group-label">Payment</span>
+            <div class="add-form-row">
+              <div class="field">
+                <label for="new-course-fee">Course fee</label>
+                <input type="number" id="new-course-fee" placeholder="Total fee (optional)" min="0" step="1" />
+              </div>
+              <div class="field">
+                <label for="new-payment">Paid now</label>
+                <input type="number" id="new-payment" placeholder="Amount paid (optional)" min="0" step="1" />
+              </div>
+              <div class="field">
+                <label>Due</label>
+                <div class="computed-value" id="new-due-display">Rs. 0</div>
+              </div>
+              <div class="field field-submit">
+                <button type="submit" class="btn-primary" id="add-student-submit">Add student</button>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <div class="table-wrap">
+          <table class="ledger-table" id="students-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Contact</th>
+                <th>Teacher</th>
+                <th>Time</th>
+                <th>Course</th>
+                <th>Duration</th>
+                <th>Admitted</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="students-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- DASHBOARD -->
+      <section id="tab-dashboard" class="tab-panel">
+        <div id="dashboard-empty" class="empty-state" hidden>
+          <p>No students on the register yet.</p>
+          <p class="empty-sub">Add them in the Students tab, or import your existing list from Excel.</p>
+        </div>
+
+        <div id="overrun-section" hidden>
+          <h2 class="dash-section-heading overrun-heading" id="overrun-heading">Needs Attention</h2>
+          <div class="dashboard-grid overrun-grid" id="overrun-grid"></div>
+        </div>
+
+        <h2 class="dash-section-heading" id="active-heading" hidden>Active Students</h2>
+        <div class="dashboard-grid" id="dashboard-grid"></div>
+      </section>
+
+      <!-- TEACHERS -->
+      <section id="tab-teachers" class="tab-panel">
+        <div class="teacher-directory" id="teachers-list"></div>
+      </section>
+
+      <!-- SYNC -->
+      <section id="tab-sync" class="tab-panel">
+        <div class="sync-panel">
+          <p class="sync-intro">
+            Auto-sync pulls new students from your OneDrive registration sheet and new payments from your
+            OneDrive receipts ledger. Both are read through a Power Automate flow you set up on your Microsoft
+            365 account — paste each flow's HTTP trigger URL below. Payments are matched to existing students
+            by name; unmatched rows are skipped and reported below (no new students are ever created from
+            the receipts file).
+          </p>
+
+          <form id="sync-config-form" class="add-form">
+            <div class="add-form-group">
+              <span class="add-form-group-label">OneDrive sources</span>
+              <div class="field">
+                <label for="sync-students-url">Student registrations flow URL (Sangeet_Pathshala.xlsx)</label>
+                <input type="url" id="sync-students-url" placeholder="https://prod-00.westus.logic.azure.com/..." />
+              </div>
+              <div class="field">
+                <label for="sync-students-since">Only import students admitted on/after</label>
+                <input type="text" id="sync-students-since" class="bs-date-input" placeholder="YYYY-MM-DD (BS)" />
+                <small class="field-hint">Rows before this date are ignored — use it to skip students already in your register.</small>
+              </div>
+              <div class="field">
+                <label for="sync-payments-url">Payments / receipts flow URL (Sangeet_Pathshala_Receipts.xlsx)</label>
+                <input type="url" id="sync-payments-url" placeholder="https://prod-00.westus.logic.azure.com/..." />
+              </div>
+            </div>
+
+            <div class="add-form-group">
+              <span class="add-form-group-label">Schedule</span>
+              <div class="add-form-row">
+                <div class="field">
+                  <label for="sync-interval">Check every</label>
+                  <select id="sync-interval">
+                    <option value="2">2 minutes</option>
+                    <option value="5" selected>5 minutes</option>
+                    <option value="10">10 minutes</option>
+                    <option value="15">15 minutes</option>
+                    <option value="30">30 minutes</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="sync-enabled">Auto-sync</label>
+                  <select id="sync-enabled">
+                    <option value="false">Off</option>
+                    <option value="true">On</option>
+                  </select>
+                </div>
+                <div class="field field-submit">
+                  <button type="submit" class="btn-primary">Save settings</button>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          <div class="status-line" id="sync-config-status"></div>
+
+          <div class="sync-status-card" id="sync-status-card">
+            <div class="sync-status-head">Last sync</div>
+            <div id="sync-status-body" class="sync-status-body">No sync has run yet.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ALERTS -->
+      <section id="tab-alerts" class="tab-panel">
+        <div class="sync-panel">
+          <p class="sync-intro">
+            Sends the admin an email when a student is close to running out of classes, and again when their
+            classes are over and they're due for renewal — one email per student per course cycle. Also sends an
+            email the moment a student is recorded with an outstanding due, plus a follow-up reminder if that due
+            is still unpaid after 20 days. The actual email is sent by a Power Automate flow: paste its
+            HTTP-trigger URL below. Checks run automatically right after attendance is saved and right after a
+            payment is recorded, and again on the schedule below as a backup.
+          </p>
+
+          <form id="alert-config-form" class="add-form">
+            <div class="add-form-group">
+              <span class="add-form-group-label">Power Automate flow</span>
+              <div class="field">
+                <label for="alert-flow-url">Alert email flow URL</label>
+                <input type="url" id="alert-flow-url" placeholder="https://prod-00.westus.logic.azure.com/..." />
+                <small class="field-hint">The flow receives a small JSON payload (student name, course, classes attended/allotted, alert type) and sends the email — e.g. via an Outlook "Send an email (V2)" action to the school admin's inbox.</small>
+              </div>
+            </div>
+
+            <div class="add-form-group">
+              <span class="add-form-group-label">Backup schedule</span>
+              <div class="add-form-row">
+                <div class="field">
+                  <label for="alert-interval">Also check every</label>
+                  <select id="alert-interval">
+                    <option value="30">30 minutes</option>
+                    <option value="60" selected>1 hour</option>
+                    <option value="180">3 hours</option>
+                    <option value="360">6 hours</option>
+                    <option value="1440">Once a day</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="alert-enabled">Alerts</label>
+                  <select id="alert-enabled">
+                    <option value="false">Off</option>
+                    <option value="true">On</option>
+                  </select>
+                </div>
+                <div class="field field-submit">
+                  <button type="submit" class="btn-primary">Save settings</button>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          <div class="status-line" id="alert-config-status"></div>
+
+          <div class="sync-status-card" id="alert-status-card">
+            <div class="sync-status-head">Last check</div>
+            <div id="alert-status-body" class="sync-status-body">No check has run yet.</div>
+          </div>
+
+          <div class="sync-status-card" id="alert-list-card">
+            <div class="sync-status-head">Renewal needed now</div>
+            <div id="alert-renewals-body" class="sync-status-body">No students are over their allotment right now.</div>
+          </div>
+
+          <div class="sync-status-card" id="alert-list-card-2">
+            <div class="sync-status-head">Warning zone (almost over)</div>
+            <div id="alert-warnings-body" class="sync-status-body">No students are close to their allotment right now.</div>
+          </div>
+
+          <div class="sync-status-card" id="alert-list-card-3">
+            <div class="sync-status-head">Payment due now</div>
+            <div id="alert-dues-body" class="sync-status-body">No students have an outstanding due right now.</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL (fields mirror the receipts spreadsheet) -->
+<div class="modal-overlay" id="payment-modal" hidden>
+  <div class="modal receipt-modal">
+    <div class="modal-header">
+      <h2>Record Payment</h2>
+      <button type="button" class="modal-close" id="payment-modal-close">&times;</button>
+    </div>
+
+    <form id="payment-form">
+      <input type="hidden" id="pay-student-id" />
+      <input type="hidden" id="pay-enrollment-id" />
+      <div class="modal-sub" id="pay-student-heading"></div>
+
+      <div class="add-form-row">
+        <div class="field"><label for="pay-payer">Payer</label><input type="text" id="pay-payer" required /></div>
+        <div class="field"><label for="pay-phone">Phone</label><input type="text" id="pay-phone" /></div>
+        <div class="field"><label for="pay-course">Course</label><input type="text" id="pay-course" /></div>
+      </div>
+
+      <div class="add-form-row">
+        <div class="field"><label for="pay-tutor">Tutor</label><input type="text" id="pay-tutor" /></div>
+        <div class="field"><label for="pay-schedule">Schedule</label><input type="text" id="pay-schedule" /></div>
+        <div class="field"><label for="pay-months">Months</label><input type="number" id="pay-months" min="1" step="1" value="1" /></div>
+      </div>
+
+      <div class="add-form-row">
+        <div class="field"><label for="pay-class-start">Class start</label><input type="text" id="pay-class-start" class="bs-date-input" placeholder="YYYY-MM-DD (BS)" /></div>
+        <div class="field"><label for="pay-class-end">Class end</label><input type="text" id="pay-class-end" class="bs-date-input" placeholder="YYYY-MM-DD (BS)" /></div>
+        <div class="field"><label for="pay-date">Pay date</label><input type="text" id="pay-date" class="bs-date-input" placeholder="YYYY-MM-DD (BS)" /></div>
+      </div>
+
+      <span class="add-form-group-label">Fee items</span>
+      <div id="pay-fee-items" class="fee-items"></div>
+      <button type="button" class="btn-secondary btn-small" id="pay-add-fee-item">+ Add fee item</button>
+
+      <div class="add-form-row" style="margin-top: 0.7rem;">
+        <div class="field"><label for="pay-discount">Discount</label><input type="number" id="pay-discount" min="0" step="1" value="0" /></div>
+        <div class="field"><label>Total amount</label><div class="computed-value" id="pay-total-display">Rs. 0</div></div>
+        <div class="field"><label for="pay-paid">Paid amount</label><input type="number" id="pay-paid" min="1" step="1" required /></div>
+      </div>
+
+      <div class="add-form-row">
+        <div class="field"><label>Balance due</label><div class="computed-value" id="pay-balance-display">Rs. 0</div></div>
+        <div class="field">
+          <label for="pay-method">Method</label>
+          <select id="pay-method">
+            <option value="Cash">Cash</option>
+            <option value="Online Transfer">Online Transfer</option>
+            <option value="Esewa / Khalti">Esewa / Khalti</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Cheque">Cheque</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="field"><label for="pay-received-by">Received by</label><input type="text" id="pay-received-by" /></div>
+      </div>
+
+      <div class="field"><label for="pay-notes">Notes</label><input type="text" id="pay-notes" /></div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="payment-modal-cancel">Cancel</button>
+        <button type="submit" class="btn-primary">Save receipt</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="override-modal" hidden>
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Add classes taken before this system</h2>
+      <button type="button" class="modal-close" id="override-modal-close">&times;</button>
+    </div>
+
+    <form id="override-form">
+      <input type="hidden" id="override-student-id" />
+      <div class="modal-sub" id="override-student-heading"></div>
+      <p class="field-hint" style="margin: 0 0 14px 0;">Adds a starting balance on top of real Roll Call attendance — it does not freeze or replace it. Every class you mark going forward still adds normally on top of these numbers. Set both to 0 to remove the starting balance.</p>
+
+      <div class="field">
+        <label for="override-password">Admin password</label>
+        <input type="password" id="override-password" required autocomplete="current-password" />
+        <small class="field-hint">Same password you use to log into the app.</small>
+      </div>
+
+      <div class="add-form-row">
+        <div class="field"><label for="override-baseline-present">Classes already present</label><input type="number" id="override-baseline-present" min="0" step="1" value="0" /></div>
+        <div class="field"><label for="override-baseline-absent">Classes already absent</label><input type="number" id="override-baseline-absent" min="0" step="1" value="0" /></div>
+      </div>
+
+      <p class="field-hint" id="override-preview" style="margin: 10px 0 0 0;"></p>
+
+      <div class="status-line" id="override-status-msg"></div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="override-modal-cancel">Cancel</button>
+        <button type="submit" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="vendor/nepali-date-converter.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
