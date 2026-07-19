@@ -111,8 +111,51 @@ function pickField(row, candidates) {
   return '';
 }
 
+// Same conversion library used client-side for the BS calendar UI, loaded
+// here too so Excel imports can detect and correct BS dates that were typed
+// directly into a plain (Gregorian-only) Excel date cell — see
+// excelDateToString below for why that needs correcting at all.
+const NepaliDateLib = require('./public/vendor/nepali-date-converter.js').default;
+
+function bsPartsToAdString(y, m, d) {
+  try {
+    const nd = new NepaliDateLib(`${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+    const jsDate = nd.toJsDate();
+    if (isNaN(jsDate.getTime())) return null;
+    const mm = String(jsDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(jsDate.getDate()).padStart(2, '0');
+    return `${jsDate.getFullYear()}-${mm}-${dd}`;
+  } catch (err) {
+    return null;
+  }
+}
+
+// A school admission is never genuinely 50+ years in the future. A year
+// that high almost always means someone typed a BS calendar date (e.g.
+// "1/15/2083") directly into a plain Excel date cell — Excel has no BS
+// calendar mode, so it just stores that as a literal (and wildly future)
+// Gregorian date. This re-interprets the same y/m/d numbers as BS and
+// converts them to the real AD date instead of storing the nonsense as-is.
+function correctIfMistypedBs(y, m, d) {
+  if (y >= 2070 && y <= 2110) {
+    const converted = bsPartsToAdString(y, m, d);
+    if (converted) return converted;
+  }
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
+function parseLooseDateParts(str) {
+  let m = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (m) return { y: Number(m[1]), m: Number(m[2]), d: Number(m[3]) };
+  m = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+  if (m) return { y: Number(m[3]), m: Number(m[1]), d: Number(m[2]) };
+  return null;
+}
+
 function excelDateToString(value) {
-  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  if (value instanceof Date) {
+    return correctIfMistypedBs(value.getFullYear(), value.getMonth() + 1, value.getDate());
+  }
 
   // Excel serial date — may arrive as a real number (from an uploaded
   // .xlsx) or as a numeric string (Power Automate's JSON often sends
@@ -123,14 +166,16 @@ function excelDateToString(value) {
 
   if (serial !== null) {
     const parsed = XLSX.SSF.parse_date_code(serial);
-    if (parsed) {
-      const mm = String(parsed.m).padStart(2, '0');
-      const dd = String(parsed.d).padStart(2, '0');
-      return `${parsed.y}-${mm}-${dd}`;
-    }
+    if (parsed) return correctIfMistypedBs(parsed.y, parsed.m, parsed.d);
   }
 
-  return String(value || '').trim();
+  // Plain text cell (e.g. "1/15/2083" or "2083-01-15" typed directly, not a
+  // real Excel date). Same BS/AD detection applies once parsed.
+  const str = String(value || '').trim();
+  const parts = str ? parseLooseDateParts(str) : null;
+  if (parts) return correctIfMistypedBs(parts.y, parts.m, parts.d);
+
+  return str;
 }
 
 function todayISO() {
